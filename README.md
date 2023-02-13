@@ -2,29 +2,28 @@
 Implementation of forward-forward (FF) training algorithm - an alternative to back-propagation
 ---
 
+The base of the supervised version is taken from https://github.com/mohammadpz/pytorch_forward_forward.
+This is an extension with the unsupervised data, with the idea of also implementing the top-down approach.
+
 Below is my understanding of the FF algorithm presented at [Geoffrey Hinton's talk at NeurIPS 2022](https://www.cs.toronto.edu/~hinton/FFA13.pdf).\
 The conventional backprop computes the gradients by successive applications of the chain rule, from the objective function to the parameters. FF, however, computes the gradients locally with a local objective function, so there is no need to backpropagate the errors.
 
-![](./imgs/BP_vs_FF.png)
 
-The local objective function is designed to push a layer's output to values larger than a threshold for positive samples and to values smaller than a threshold for negative samples.
 
-A positive sample $s$ is a real datapoint with a large $P(s)$ under the training distribution.\
-A negative sample $s'$ is a fake datapoint with a small $P(s')$ under the training distribution.
+Smaller nets result:
 
-![](./imgs/layer.png)
+Net([784, 64, 32])
+Supervised test error: 0.09550005197525024
 
-Among the many ways of generating the positive/negative samples, for MNIST, we have:\
-Positive sample $s = merge(x, y)$, the image and its label\
-Negative sample $s' = merge(x, y_{random})$, the image and a random label
+Net([784, 64, 64, 64, 64])
+Unsupervised test error: 0.6461000144481659
 
-![](./imgs/pos_neg.png)
+-----------------------------------------------------
 
-After training all the layers, to make a prediction for a test image $x$, we find the pair $s = (x, y)$ for all $0 \leq y < 10$ that maximizes the network's overall activation.
+Larger nets result:
 
-With this implementation, the training and test errors on MNIST are:
-```python
-> python main.py
-train error: 0.06754004955291748
-test error: 0.06840002536773682
-```
+Net([784, 2000, 2000])
+Supervised test error: 0.06480002403259277
+
+Net([784, 1000, 1000, 1000, 1000])
+Unsupervised test error: 0.6809000074863434
